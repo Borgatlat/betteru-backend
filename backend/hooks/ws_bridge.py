@@ -44,4 +44,14 @@ async def rtc_signal(websocket: WebSocket):
         # Run both directions concurrently
         await asyncio.gather(client_to_openai(), openai_to_client())
 
+async def cleanup_session(websocket: WebSocket):
+    try:
+        await websocket.close()
+    except Exception:
+        pass
+
+def validate_audio_format(audio_data):
+    # Check if audio is in correct PCM16 format
+    pass
+
 

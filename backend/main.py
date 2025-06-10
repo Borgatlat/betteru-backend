@@ -4,7 +4,21 @@ import openai
 import websockets
 import json
 import os
-from app.backend.hooks.ws_bridge import router as ws_router  # Import the WebSocket bridge router
+from dotenv import load_dotenv
+from app.backend.hooks.ws_bridge import router as ws_router
+
+# Load environment variables
+load_dotenv()
+
+# Validate required environment variables
+required_env_vars = [
+    "OPENAI_API_KEY",
+    "EXPO_PUBLIC_SIGNAL_WS_URL"
+]
+
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+if missing_vars:
+    raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 app = FastAPI()
 
@@ -39,8 +53,6 @@ async def connect_and_send_session_update():
     url = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01"
     async with websockets.connect(url, extra_headers=get_openai_headers()) as ws:
         await ws.send(json.dumps(session_config))
-        # You can now continue to send/receive events as needed
-        # For demonstration, just receive the first message
         response = await ws.recv()
         return response
 
@@ -49,3 +61,8 @@ async def connect_and_send_session_update():
 async def start_solace_session():
     response = await connect_and_send_session_update()
     return {"openai_response": response}
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "env_vars_loaded": all(os.getenv(var) for var in required_env_vars)}
