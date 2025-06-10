@@ -22,9 +22,9 @@ aiohttp==3.8.5
 black==23.7.0
 pytest==7.4.0
 
-# CORS and Security
+# Compatibility
+pydantic==1.10.13
 starlette==0.27.0
-pydantic==2.4.2
 
 # Development Tools
 asyncio==3.4.3 
